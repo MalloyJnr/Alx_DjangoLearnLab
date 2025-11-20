@@ -20,8 +20,10 @@ def get_books_in_library(library_name):
 # 3. Retrieve the librarian for a library
 def get_librarian_for_library(library_name):
     library = Library.objects.get(name=library_name)
-    return library.librarian  # from OneToOne relationship
 
+    # Required: Librarian.objects.get(library=library)
+    librarian = Librarian.objects.get(library=library)  # from OneToOne relationship
+    return librarian
 
 # Example usage (if running inside Django shell or script)
 if __name__ == "__main__":
