@@ -1,11 +1,18 @@
-from rest_framework import generics
-from .models import book
+from rest_framework import generics, viewsets
+from .models import Book
 from .serializers import BookSerializer
 
-# Create your views here.
+
+# Existing ListAPIView
 class BookList(generics.ListAPIView):
-    queryset = book.objects.all()
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
 
 
-    
+# NEW: Full CRUD ViewSet
+class BookViewSet(viewsets.ModelViewSet):
+    """
+    Provides list(), retrieve(), create(), update(), partial_update(), destroy()
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
