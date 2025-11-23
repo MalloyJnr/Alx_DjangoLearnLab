@@ -127,3 +127,62 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ===========================
+# SECURITY SETTINGS
+# ===========================
+
+# Never enable DEBUG in production
+DEBUG = False
+
+# Only allow your production domain(s)
+ALLOWED_HOSTS = ["yourdomain.com", "www.yourdomain.com"]
+
+# Prevent browsers from MIME-sniffing responses
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enable basic XSS protection in browsers
+SECURE_BROWSER_XSS_FILTER = True  # On Django < 4.0, otherwise use CSP
+
+# Prevent your site from being embedded in iframes (Clickjacking protection)
+X_FRAME_OPTIONS = "DENY"
+
+# Cookies only sent over HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Prevent JavaScript access to cookies
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
+# Use modern cookie security attributes
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
+# ===========================
+# Content Security Policy (CSP)
+# ===========================
+# Requires: pip install django-csp
+INSTALLED_APPS += ["csp"]
+
+MIDDLEWARE += [
+    "csp.middleware.CSPMiddleware",
+]
+
+# Example basic CSP configuration
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'", "https://fonts.googleapis.com")
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+CSP_IMG_SRC = ("'self'", "data:")
+CSP_SCRIPT_SRC = ("'self'",)
+
+
+# CSRF_COOKIE_SECURE:
+# Ensures cookie is only sent via HTTPS to prevent interception attacks.
+
+# X_FRAME_OPTIONS:
+# Protects against clickjacking by disallowing the site from being displayed in iframes.
+
+# CSP:
+# Restricts what external content (JS, CSS, images) may be loaded, reducing XSS impact.
