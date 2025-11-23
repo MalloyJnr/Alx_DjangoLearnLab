@@ -14,6 +14,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import permission_required
 from .models import Article
+from .forms import SearchForm
 
 # Create your views here.
 # ------------------------------
@@ -66,6 +67,20 @@ def book_delete(request, id):
 def list_books(request):
     books = Book.objects.all()
     return render(request, 'relationship_app/list_books.html', {'books': books})
+
+def book_list(request):
+    form = SearchForm(request.GET or None)
+    books = Book.objects.all()
+
+    if form.is_valid():
+        query = form.cleaned_data["query"]
+        if query:
+            books = books.filter(title__icontains=query)
+
+    return render(request, "bookshelf/book_list.html", {
+        "form": form,
+        "books": books,
+    })
 
 #class-based view to add a new book (requires permission)
 @permission_required('relationship_app.can_add_book')
