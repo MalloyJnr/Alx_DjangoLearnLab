@@ -129,6 +129,21 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# Redirect all HTTP traffic to HTTPS automatically
+SECURE_SSL_REDIRECT = True
+
+# HTTP Strict Transport Security (HSTS)
+# 31536000 seconds = 1 year
+SECURE_HSTS_SECONDS = 31536000
+
+# Apply HSTS to all subdomains (e.g. www, api.yourdomain.com)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Enable HSTS preload flag
+# This allows your domain to be included in browser preload lists
+SECURE_HSTS_PRELOAD = True
+
+
 # ===========================
 # SECURITY SETTINGS
 # ===========================
