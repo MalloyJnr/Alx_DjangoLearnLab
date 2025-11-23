@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import permission_required
 from .models import Article
 from .forms import SearchForm
+from .forms import ExampleForm
 
 # Create your views here.
 # ------------------------------
@@ -80,6 +81,25 @@ def book_list(request):
     return render(request, "bookshelf/book_list.html", {
         "form": form,
         "books": books,
+    })
+
+def example_form_view(request):
+    """
+    Demonstrates secure form handling, including CSRF protection
+    and validated input using ExampleForm.
+    """
+    if request.method == "POST":
+        form = ExampleForm(request.POST)
+        if form.is_valid():
+            # Safely processed form data
+            cleaned = form.cleaned_data
+            # Perform safe actions like sending email, saving data, etc.
+            return redirect("success-page")  # replace with your actual URL name
+    else:
+        form = ExampleForm()
+
+    return render(request, "bookshelf/form_example.html", {
+        "form": form,
     })
 
 #class-based view to add a new book (requires permission)
