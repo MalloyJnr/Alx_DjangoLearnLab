@@ -7,7 +7,9 @@ from .import views
 from .admin_view import admin_view
 from .librarian_view import librarian_view
 from .member_view import member_view
-from .views import add_book, edit_book, delete_book
+from .views import add_book 
+from .views import edit_book 
+from .views import delete_book
 
 
 urlpatterns = [
