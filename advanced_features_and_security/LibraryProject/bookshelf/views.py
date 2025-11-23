@@ -20,7 +20,7 @@ from .models import Article
 # VIEW: View Article List
 # ------------------------------
 @permission_required('app_name.can_view', raise_exception=True)
-def article_list(request):
+def book_list(request):
     articles = Article.objects.all()
     return render(request, "article_list.html", {"articles": articles})
 
@@ -29,7 +29,7 @@ def article_list(request):
 # VIEW: Create Article
 # ------------------------------
 @permission_required('app_name.can_create', raise_exception=True)
-def article_create(request):
+def book_create(request):
     if request.method == "POST":
         title = request.POST.get("title")
         content = request.POST.get("content")
@@ -42,7 +42,7 @@ def article_create(request):
 # VIEW: Edit Article
 # ------------------------------
 @permission_required('app_name.can_edit', raise_exception=True)
-def article_edit(request, id):
+def book_edit(request, id):
     article = get_object_or_404(Article, id=id)
     if request.method == "POST":
         article.title = request.POST.get("title")
@@ -56,7 +56,7 @@ def article_edit(request, id):
 # VIEW: Delete Article
 # ------------------------------
 @permission_required('app_name.can_delete', raise_exception=True)
-def article_delete(request, id):
+def book_delete(request, id):
     article = get_object_or_404(Article, id=id)
     article.delete()
     return redirect("article_list")
