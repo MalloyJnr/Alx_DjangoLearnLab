@@ -6,18 +6,51 @@ from django.contrib.auth import login
 from django.contrib.auth import logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.views import LogoutView
 from django.urls import reverse_lazy
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import permission_required
 
 # Create your views here.
 #function-based view to list all books
 def list_books(request):
     books = Book.objects.all()
     return render(request, 'relationship_app/list_books.html', {'books': books})
+
+#class-based view to add a new book (requires permission)
+@permission_required('relationship_app.can_add_book')
+def add_book(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        author_id = request.POST.get("author")
+        Book.objects.create(title=title, author_id=author_id)
+        return redirect("list_books")
+    return render(request, "relationship_app/add_book.html")
+
+#class-based view to edit an existing book (requires permission)
+@permission_required('relationship_app.can_change_book')
+def edit_book(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == "POST":
+        book.title = request.POST.get("title")
+        author_id = request.POST.get("author")
+        book.author_id = author_id
+        book.save()
+        return redirect("list_books")
+    return render(request, "relationship_app/edit_book.html", {"book": book})
+
+#class-based view to delete a book (requires permission)
+@permission_required('relationship_app.can_delete_book')
+def delete_book(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == "POST":
+        book.delete()
+        return redirect("list_books")
+    return render(request, "relationship_app/delete_book.html", {"book": book})
+
 
 
 #class-based detail view for a specific library
