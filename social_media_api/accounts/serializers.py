@@ -1,6 +1,10 @@
-from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
-from .models import User
+from rest_framework import serializers
+from rest_framework.authtoken.models import Token
+
+User = get_user_model()
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -16,6 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             bio=validated_data.get('bio', '')
         )
+        Token.objects.create(user=user)
         return user
 
 
@@ -24,10 +29,18 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        user = authenticate(**data)
+        user = authenticate(
+            username=data['username'],
+            password=data['password']
+        )
         if not user:
             raise serializers.ValidationError("Invalid credentials")
-        return user
+
+        token, _ = Token.objects.get_or_create(user=user)
+        return {
+            "user": user,
+            "token": token.key
+        }
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
