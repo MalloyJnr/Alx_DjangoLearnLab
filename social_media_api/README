@@ -1,0 +1,18 @@
+Setup :
+pip install django djangorestframework pillow
+python manage.py migrate
+python manage.py runserver
+
+Authentication:
+
+Token-based authentication
+
+Tokens returned on registration & login
+
+User Model:
+
+Custom User extending AbstractUser
+
+Fields: bio, profile_picture, followers
+
+Self-referential follow system
