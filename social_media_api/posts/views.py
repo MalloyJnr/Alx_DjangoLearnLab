@@ -1,10 +1,17 @@
 from rest_framework import viewsets, permissions, filters
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
 
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -24,8 +31,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
+        comment = serializer.save(author=self.request.user)
+        if comment.post.author != self.request.user:
+            Notification.objects.create(
+                recipient=comment.post.author,
+                actor=self.request.user,
+                verb="commented on your post",
+                target=comment.post
+        )
 
 class FeedView(ListAPIView):
     serializer_class = PostSerializer
@@ -35,3 +48,44 @@ class FeedView(ListAPIView):
         user = self.request.user
         following_users = user.following.all()
         return Post.objects.filter(author__in=following_users).order_by("-created_at")
+    
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def like_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    if Like.objects.filter(user=request.user, post=post).exists():
+        return Response(
+            {"detail": "You already liked this post."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    Like.objects.create(user=request.user, post=post)
+
+    if post.author != request.user:
+        Notification.objects.create(
+            recipient=post.author,
+            actor=request.user,
+            verb="liked your post",
+            target_content_type=ContentType.objects.get_for_model(Post),
+            target_object_id=post.id
+        )
+
+    return Response(
+        {"detail": "Post liked."},
+        status=status.HTTP_201_CREATED
+    )
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def unlike_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    Like.objects.filter(user=request.user, post=post).delete()
+
+    return Response(
+        {"detail": "Post unliked."},
+        status=status.HTTP_200_OK
+    )
+

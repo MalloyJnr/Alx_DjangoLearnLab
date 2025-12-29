@@ -70,6 +70,7 @@ def follow_user(request, user_id):
     )
 
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def unfollow_user(request, user_id):
