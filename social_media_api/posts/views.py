@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, filters
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
+from rest_framework import generics
 
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -53,15 +54,15 @@ class FeedView(ListAPIView):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def like_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+    post = generics.get_object_or_404(Post, pk=pk)
 
-    if Like.objects.filter(user=request.user, post=post).exists():
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+    if not created:
         return Response(
             {"detail": "You already liked this post."},
             status=status.HTTP_400_BAD_REQUEST
         )
-
-    Like.objects.create(user=request.user, post=post)
 
     if post.author != request.user:
         Notification.objects.create(
@@ -77,11 +78,11 @@ def like_post(request, pk):
         status=status.HTTP_201_CREATED
     )
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def unlike_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-
+    post = generics.get_object_or_404(Post, pk=pk)
     Like.objects.filter(user=request.user, post=post).delete()
 
     return Response(
